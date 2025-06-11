@@ -20,7 +20,7 @@ Library components: [react-native-reusables](https://rnr-docs.vercel.app/getting
 - Download and install [NodeJS](https://nodejs.org/en)
 #### Install dependencies
 ```
-npx install
+npm install
 ```
 #### Run the app
 ```
