@@ -1,33 +1,41 @@
 import { Link, useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { View } from "react-native";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Text } from "~/components/ui/text";
 import { auth } from "~/constants/config";
+import { AuthContext } from "~/context/AuthContext";
+import { showErrorToast } from "~/hooks/toast";
 
 export default function LoginScreen() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter()
+  const { signIn } = useContext(AuthContext)
 
-  const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // success login
-        const user = userCredential.user;
-        console.log(user);
-        router.push('/home')
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log(error);
-      });
+  const handleLogin = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      const token = await user.getIdToken()
+      signIn(token)
+      router.push('/home');
+    } catch (error: any) {
+      const errorMessage = error.message;
+      if (errorMessage.includes("auth/invalid-email")) {
+        showErrorToast("Email o contraseña incorrecta", "Por favor, ingresa credenciales correctas");
+        return
+      }
+      console.log(error);
+      showErrorToast("Error desconocido", "Hubo un error, intente de nuevo mas tarde");
+      return
+    }
   }
+
   return (
     <View className="w-max mx-16 my-12">
       <View className="space-y-2 text-center">

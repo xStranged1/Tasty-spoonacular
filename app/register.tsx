@@ -7,8 +7,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Text } from "~/components/ui/text";
 import { auth } from "~/constants/config";
-import { showErrorToast } from "~/hooks/toast";
-
+import { showErrorToast, showSuccessToast } from "~/hooks/toast";
 
 export default function Register() {
 
@@ -19,21 +18,17 @@ export default function Register() {
     const handleRegister = () => {
         createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
-                // Signed up 
-                const user = userCredential.user;
-                console.log("user");
-                console.log(user);
+                showSuccessToast("Cuenta creada con éxito", "Ahora puedes iniciar sesión con tu cuenta");
                 router.replace('/')
             })
             .catch((error) => {
-
-                const errorCode = error.code;
                 const errorMessage = error.message;
-                console.log("errorMessage");
-                console.log(errorMessage);
+                if (errorMessage.includes("email-already-in-use")) {
+                    showErrorToast("Este email ya está registrado", "Por favor, intenta con otro email");
+                    return
+                }
                 showErrorToast("Hubo un error en el registro", "Por favor, intentelo de nuevo mas tarde");
-
-                // ..
+                return
             });
     }
 
@@ -55,9 +50,6 @@ export default function Register() {
                 <Button className="w-full mt-4 bg-green-600" onPress={handleRegister}>
                     <Text>Crear cuenta</Text>
                 </Button>
-                <Link href="/register" className="inline-block w-full text-center text-sm underline" prefetch={false}>
-                    <Text>No tenes una cuenta? Registrate</Text>
-                </Link>
             </View>
         </View>
     );
