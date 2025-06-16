@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { View, Image, ScrollView } from "react-native";
 import { Text } from '~/components/ui/text';
 import { RecipeDetail } from "~/constants/types";
@@ -8,16 +8,19 @@ import { capitalizer } from "~/utils/utils";
 import LoadingScreen from "./components/LoadingScreen";
 import { Card, CardContent, CardDescription, CardFooter } from "~/components/ui/card";
 import { dummyReceipe } from "~/constants/const";
+import { FavoritesContext } from "~/context/FavoritesContext";
+import { Button } from "~/components/ui/button";
 
 export default function RecipeDetailScreen() {
+
     const { id, name } = useLocalSearchParams();
     const [recipe, setRecipe] = useState<RecipeDetail>(dummyReceipe);
     const [loading, setLoading] = useState(true);
-
+    const { addFavorite } = useContext(FavoritesContext)
     console.log("RecipeDetail", id, name, recipe);
 
     const navigation = useNavigation();
-    useEffect(() => {
+    useEffect(() => { // Pone titulo en la screen
         navigation.setOptions({ title: capitalizer(name as string) });
     }, [navigation]);
 
@@ -44,6 +47,18 @@ export default function RecipeDetailScreen() {
                 source={{ uri: recipe?.image }}
                 className="w-full h-64 object-contain"
             />
+            {/* este button puede ser un <3 arriba a la derecha en imagen */}
+            <Button onPress={() => {
+                const favoriteRecipe = {
+                    id: recipe?.id || 0,
+                    title: recipe?.title || "",
+                    image: recipe?.image || "",
+                }
+                addFavorite(favoriteRecipe)
+            }}>
+                <Text>Agregar receta a favoritos</Text>
+            </Button>
+
             <Card className="p-4">
                 <CardDescription>
                     <Text className="text-lg font-bold">{recipe?.title}</Text>
