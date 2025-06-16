@@ -1,15 +1,15 @@
 import '~/global.css';
-
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation/native';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as React from 'react';
-import { Platform } from 'react-native';
+import { Dimensions, Platform } from 'react-native';
 import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
 import { PortalHost } from '@rn-primitives/portal';
 import { ThemeToggle } from '~/components/ThemeToggle';
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar';
+import Toast, { BaseToast, ErrorToast, ToastConfig } from 'react-native-toast-message';
 import { AuthProvider } from '../context/AuthContext';
 import { FavoritesProvider } from '../context/FavoritesContext';
 
@@ -26,6 +26,42 @@ export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from 'expo-router';
+
+const { width } = Dimensions.get('window');
+
+export const toastConfig: ToastConfig = {
+  success: (props: any) => (
+    <BaseToast
+      {...props}
+      style={{
+        marginHorizontal: 20,
+        maxWidth: width - 40,
+        paddingRight: 20,
+        borderLeftColor: '#4caf50',
+      }}
+      contentContainerStyle={{ paddingHorizontal: 15 }}
+      text1Style={{
+        fontSize: 15,
+        fontWeight: '400',
+      }}
+    />
+  ),
+  error: (props: any) => (
+    <ErrorToast
+      {...props}
+      style={{
+        marginHorizontal: 20,
+        maxWidth: width - 40,
+        paddingRight: 20,
+        borderLeftColor: '#f00',
+      }}
+      text1Style={{
+        fontSize: 15,
+        fontWeight: '400',
+      }}
+    />
+  ),
+};
 
 export default function RootLayout() {
   const hasMounted = React.useRef(false);
@@ -51,30 +87,46 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <AuthProvider>
-        <FavoritesProvider>
-          <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
-          <Stack>
-            <Stack.Screen
-              name='index'
-              options={{
-                title: 'Starter Base',
-                headerRight: () => <ThemeToggle />,
-              }}
-            />
-            <Stack.Screen
-              name='recipe/[id]'
-              options={{
-                title: 'Receta',
-                headerRight: () => <ThemeToggle />,
-              }}
-            />
-          </Stack>
-          <PortalHost />
-        </FavoritesProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <>
+      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+        <AuthProvider>
+          <FavoritesProvider>
+            <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
+            <Stack>
+              <Stack.Screen
+                name='index'
+                options={{
+                  title: 'Login',
+                }}
+              />
+              <Stack.Screen
+                name='register'
+                options={{
+                  title: 'Registro',
+                }}
+              />
+              <Stack.Screen
+                name='home'
+                options={{
+                  title: 'Starter Base',
+                  headerRight: () => <ThemeToggle />,
+                }}
+              />
+
+              <Stack.Screen
+                name='recipe/[id]'
+                options={{
+                  title: 'Receta',
+                  headerRight: () => <ThemeToggle />,
+                }}
+              />
+            </Stack>
+            <PortalHost />
+          </FavoritesProvider>
+        </AuthProvider>
+      </ThemeProvider>
+      <Toast config={toastConfig} />
+    </>
   );
 }
 
