@@ -10,6 +10,8 @@ import { useColorScheme } from '~/lib/useColorScheme';
 import { PortalHost } from '@rn-primitives/portal';
 import { ThemeToggle } from '~/components/ThemeToggle';
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar';
+import { AuthProvider } from '../context/AuthContext';
+import { FavoritesProvider } from '../context/FavoritesContext';
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -50,24 +52,28 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
-      <Stack>
-        <Stack.Screen
-          name='index'
-          options={{
-            title: 'Starter Base',
-            headerRight: () => <ThemeToggle />,
-          }}
-        />
-        <Stack.Screen
-          name='recipe/[id]'
-          options={{
-            title: 'Receta',
-            headerRight: () => <ThemeToggle />,
-          }}
-        />
-      </Stack>
-      <PortalHost />
+      <AuthProvider>
+        <FavoritesProvider>
+          <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
+          <Stack>
+            <Stack.Screen
+              name='index'
+              options={{
+                title: 'Starter Base',
+                headerRight: () => <ThemeToggle />,
+              }}
+            />
+            <Stack.Screen
+              name='recipe/[id]'
+              options={{
+                title: 'Receta',
+                headerRight: () => <ThemeToggle />,
+              }}
+            />
+          </Stack>
+          <PortalHost />
+        </FavoritesProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
