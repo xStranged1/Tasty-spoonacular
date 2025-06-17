@@ -6,7 +6,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Text } from "~/components/ui/text";
-import { auth } from "~/constants/config";
+// import { auth } from "~/constants/config";
 import { AuthContext } from "~/context/AuthContext";
 import { showErrorToast } from "~/hooks/toast";
 
@@ -17,32 +17,34 @@ export default function LoginScreen() {
   const router = useRouter()
   const { signIn, token } = useContext(AuthContext)
 
-  const handleLogin = async () => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      const token = await user.getIdToken()
-      signIn(token)
-      router.push('/home');
-    } catch (error: any) {
-      const errorMessage = error.message;
-      if (errorMessage.includes("auth/invalid-credential")) {
-        showErrorToast("Email o contraseña incorrecta", "Por favor, ingresa credenciales correctas");
-        return
-      }
-      console.log(error);
-      showErrorToast("Error desconocido", "Hubo un error, intente de nuevo mas tarde");
-      return
-    }
-  }
+  // const handleLogin = async () => {
+  //   try {
+  //     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  //     const user = userCredential.user;
+  //     const token = await user.getIdToken()
+  //     signIn(token)
+  //     router.push('/home');
+  //   } catch (error: any) {
+  //     const errorMessage = error.message;
+  //     if (errorMessage.includes("auth/invalid-credential")) {
+  //       showErrorToast("Email o contraseña incorrecta", "Por favor, ingresa credenciales correctas");
+  //       return
+  //     }
+  //     console.log(error);
+  //     showErrorToast("Error desconocido", "Hubo un error, intente de nuevo mas tarde");
+  //     return
+  //   }
+  // }
+
+
 
   useEffect(() => {
     console.log("token");
     console.log(token);
 
-    if (token) {
+    // if (token) {
       router.replace('/home');
-    }
+    // }
   }, [])
 
   return (
@@ -60,7 +62,7 @@ export default function LoginScreen() {
           <Label htmlFor="password">Password</Label>
           <Input id="password" secureTextEntry value={password} onChangeText={(text) => setPassword(text)} />
         </View>
-        <Button className="w-full mt-4" onPress={handleLogin}>
+        <Button className="w-full mt-4" >
           <Text>Login</Text>
         </Button>
         <Link href="/register" className="inline-block w-full text-center text-sm underline" prefetch={false}>
