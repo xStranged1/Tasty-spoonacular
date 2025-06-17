@@ -1,23 +1,30 @@
 import { useState } from "react";
 import { View, ScrollView } from "react-native";
+import { Picker } from '@react-native-picker/picker';
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { dumpReceipe } from "~/constants/const";
 import { AutocompleteSearchRecipe } from "~/constants/types";
-import { autocompleteSearchRecipe } from "~/services/recipe";
+import { autocompleteSearchRecipe, searchRecipeByIngredients } from "~/services/recipe";
 import { Text } from "~/components/ui/text";
 import { Link } from "expo-router";
 
 export default function SearchRecipes() {
     const [value, setValue] = useState("");
     const [recipes, setRecipes] = useState<AutocompleteSearchRecipe[]>([]);
+    const [searchType, setSearchType] = useState<'name' | 'ingredient'>('name');
+    const [loading, setLoading] = useState(false);
 
-    const handleGetReceipes = async () => {
-        if (value) {
+    const handleGetRecipes = async () => {
+        if (!value) return;
+        setLoading(true);
+        if (searchType === 'name') {
             const recipes = await autocompleteSearchRecipe(value);
-            console.log("recipes", recipes);
+            setRecipes(Array.isArray(recipes) ? recipes : []);
+        } else {
+            const recipes = await searchRecipeByIngredients(value);
             setRecipes(Array.isArray(recipes) ? recipes : []);
         }
+        setLoading(false);
     };
 
     return (
@@ -25,14 +32,26 @@ export default function SearchRecipes() {
             <View className="flex flex-row items-center gap-2">
                 <Input
                     className="flex-1"
-                    placeholder="Buscar receta..."
+                    placeholder={searchType === 'name' ? "Buscar receta..." : "Buscar por ingredientes (ej: pollo, arroz)"}
                     value={value}
                     onChangeText={setValue}
                     aria-labelledby="inputLabel"
                     aria-errormessage="inputError"
                 />
-                <Button variant="outline" onPress={handleGetReceipes}>
-                    <Text>Buscar</Text>
+                <View style={{ minWidth: 110, marginLeft: 8, backgroundColor: 'transparent', borderRadius: 6, overflow: 'hidden' }}>
+                    <Picker
+                        selectedValue={searchType}
+                        onValueChange={(itemValue) => setSearchType(itemValue)}
+                        mode="dropdown"
+                        dropdownIconColor="#888"
+                        style={{ height: 36, color: '#222', fontSize: 12 }}
+                    >
+                        <Picker.Item label="Nombre" value="name" />
+                        <Picker.Item label="Ingrediente" value="ingredient" />
+                    </Picker>
+                </View>
+                <Button variant="outline" onPress={handleGetRecipes} disabled={loading}>
+                    <Text>{loading ? "Buscando..." : "Buscar"}</Text>
                 </Button>
             </View>
 
