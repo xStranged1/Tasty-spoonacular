@@ -1,6 +1,6 @@
 import { Link, useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { View } from "react-native";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -15,7 +15,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter()
-  const { signIn } = useContext(AuthContext)
+  const { signIn, token } = useContext(AuthContext)
 
   const handleLogin = async () => {
     try {
@@ -26,7 +26,7 @@ export default function LoginScreen() {
       router.push('/home');
     } catch (error: any) {
       const errorMessage = error.message;
-      if (errorMessage.includes("auth/invalid-email")) {
+      if (errorMessage.includes("auth/invalid-credential")) {
         showErrorToast("Email o contraseña incorrecta", "Por favor, ingresa credenciales correctas");
         return
       }
@@ -35,6 +35,15 @@ export default function LoginScreen() {
       return
     }
   }
+
+  useEffect(() => {
+    console.log("token");
+    console.log(token);
+
+    if (token) {
+      router.replace('/home');
+    }
+  }, [])
 
   return (
     <View className="w-max mx-16 my-12">
