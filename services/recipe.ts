@@ -47,8 +47,14 @@ export async function getRecipeDetail(idRecipe: string): Promise<Recipe | false>
 
 export async function searchRecipeByIngredients(ingredients: string, number: number = 10, ranking: number = 1, ignorePantry: boolean = true): Promise<Recipe[] | false> {
     try {
+        // Spoonacular espera los ingredientes separados por coma, sin espacios
+        const cleanIngredients = ingredients
+            .split(',')
+            .map(i => i.trim())
+            .filter(Boolean)
+            .join(',');
         const response = await axios({
-            url: `https://api.spoonacular.com/recipes/findByIngredients?apiKey=${API_KEY}&ingredients=${encodeURIComponent(ingredients)}&number=${number}&ranking=${ranking}&ignorePantry=${ignorePantry}`,
+            url: `https://api.spoonacular.com/recipes/findByIngredients?apiKey=${API_KEY}&ingredients=${cleanIngredients}&number=${number}&ranking=${ranking}&ignorePantry=${ignorePantry}`,
             method: 'GET',
         });
         return response.data;
