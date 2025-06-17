@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { View, Image, ScrollView } from "react-native";
 import { Text } from '~/components/ui/text';
 import { RecipeDetail } from "~/constants/types";
-import { getRecipeDetail } from "~/services/recipe";
+import { getRecipeDetail, getRecipeInstructions } from "~/services/recipe";
 import { capitalizer } from "~/utils/utils";
 import LoadingScreen from "./components/LoadingScreen";
 import { Card, CardContent, CardDescription, CardFooter } from "~/components/ui/card";
@@ -12,77 +12,120 @@ import { FavoritesContext } from "~/context/FavoritesContext";
 import { Button } from "~/components/ui/button";
 
 export default function RecipeDetailScreen() {
-
     const { id, name } = useLocalSearchParams();
     const [recipe, setRecipe] = useState<RecipeDetail>(dummyReceipe);
+    const [steps, setSteps] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const { addFavorite } = useContext(FavoritesContext)
-    console.log("RecipeDetail:", name + ", id:", id);
+    const { addFavorite } = useContext(FavoritesContext);
 
     const navigation = useNavigation();
-    useEffect(() => { // Pone titulo en la screen
+    useEffect(() => {
         navigation.setOptions({ title: capitalizer(name as string) });
     }, [navigation]);
 
     useEffect(() => {
         const getRecipe = async () => {
-            const recipeDetail = await getRecipeDetail(id as string);
-            if (recipeDetail) {
-                setRecipe(recipeDetail as RecipeDetail);
+            try {
+                const [recipeDetail, instructions] = await Promise.all([
+                    getRecipeDetail(id as string),
+                    getRecipeInstructions(id as string)
+                ]);
+                
+                if (recipeDetail) {
+                    setRecipe(recipeDetail as RecipeDetail);
+                }
+                if (instructions && instructions.length > 0) {
+                    setSteps(instructions[0].steps);
+                }
+            } catch (error) {
+                console.error("Error fetching recipe:", error);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false)
-        }
+        };
 
-        getRecipe()
-    }, [])
+        getRecipe();
+    }, [id]);
 
     if (loading) {
-        return <LoadingScreen />
+        return <LoadingScreen />;
     }
+
     return (
-        <ScrollView>
-            <Image
-                source={{ uri: recipe?.image }}
-                className="w-full h-64 object-contain"
-            />
-            {/* este button puede ser un <3 arriba a la derecha en imagen */}
-            <Button onPress={() => {
-                const favoriteRecipe = {
-                    id: recipe?.id || 0,
-                    title: recipe?.title || "",
-                    image: recipe?.image || "",
-                }
-                addFavorite(favoriteRecipe)
-            }}>
-                <Text>Agregar receta a favoritos</Text>
-            </Button>
+        <ScrollView className="flex-1 bg-background">
+            {/* Imagen y botón de favoritos */}
+            <View className="relative">
+                <Image
+                    source={{ uri: recipe?.image }}
+                    className="w-full h-64 object-cover"
+                />
+                <Button 
+                    className="absolute top-2 right-2 bg-background/90 rounded-full p-2"
+                    onPress={() => {
+                        const favoriteRecipe = {
+                            id: recipe?.id || 0,
+                            title: recipe?.title || "",
+                            image: recipe?.image || "",
+                        };
+                        addFavorite(favoriteRecipe);
+                    }}
+                >
+                    <Text className="text-primary">❤️</Text>
+                </Button>
+            </View>
 
-            <Card className="p-4">
-                <CardDescription>
-                    <Text className="text-lg font-bold">{recipe?.title}</Text>
-                    <View className="px-1" />
-                    <Text className="text-sm text-muted-foreground">
-                        {recipe?.readyInMinutes} minutes - {recipe?.servings} servings
-                    </Text>
-                </CardDescription>
-                <CardContent>
-
-                    <Text className="mt-2 text-sm font-semibold">Ingredients:</Text>
-                    {recipe?.extendedIngredients.map((ingredient) => (
-                        <Text key={ingredient.id} className="text-sm">
-                            - {ingredient.original}
+            {/* Información principal */}
+            <Card className="m-4">
+                <CardDescription className="p-4">
+                    <Text className="text-2xl font-bold text-foreground">{recipe?.title}</Text>
+                    <View className="flex-row items-center mt-1">
+                        <Text className="text-sm text-muted-foreground">
+                            ⏱️ {recipe?.readyInMinutes} minutos • 🍽️ {recipe?.servings} porciones
                         </Text>
+                    </View>
+                </CardDescription>
+
+                {/* Ingredientes */}
+                <CardContent className="px-4 pb-4">
+                    <Text className="text-lg font-bold mb-2 text-foreground">Ingredientes:</Text>
+                    {recipe?.extendedIngredients.map((ingredient) => (
+                        <View key={ingredient.id} className="flex-row items-start mb-1">
+                            <Text className="text-muted-foreground">•</Text>
+                            <Text className="ml-2 flex-1 text-muted-foreground">{ingredient.original}</Text>
+                        </View>
                     ))}
                 </CardContent>
-                <CardFooter>
-                    <Text className="text-sm text-muted-foreground">
-                        Source: <Text className="text-blue-500">{recipe?.sourceName}</Text>
-                    </Text>
-                    <Text className="text-sm text-muted-foreground">
-                        <Text className="text-blue-500">{recipe?.sourceUrl}</Text>
-                    </Text>
-                </CardFooter>
             </Card>
+
+            {/* Pasos de preparación */}
+            {steps.length > 0 && (
+                <Card className="m-4">
+                    <CardContent className="p-4">
+                        <Text className="text-lg font-bold mb-3 text-foreground">Preparación:</Text>
+                        {steps.map((step) => (
+                            <View key={step.number} className="mb-4">
+                                <View className="flex-row items-start">
+                                    <View className="bg-primary rounded-full w-6 h-6 items-center justify-center mr-2">
+                                        <Text className="text-white dark:text-black font-bold">{step.number}</Text>
+                                    </View>
+                                    <Text className="flex-1 text-muted-foreground">{step.step}</Text>
+                                </View>
+                            </View>
+                        ))}
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Fuente */}
+            {recipe?.sourceUrl && (
+                <Card className="m-4">
+                    <CardFooter className="p-4">
+                        <Text className="text-sm text-muted-foreground">
+                            Fuente: <Text className="text-blue-500 underline">{recipe.sourceName}</Text>
+                        </Text>
+                    </CardFooter>
+                </Card>
+            )}
         </ScrollView>
-    )
+    );
 }

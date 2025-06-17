@@ -60,7 +60,7 @@ export default function LoginScreen() {
           <Label htmlFor="password">Password</Label>
           <Input id="password" secureTextEntry value={password} onChangeText={(text) => setPassword(text)} />
         </View>
-        <Button className="w-full mt-4" onPress={handleLogin}>
+        <Button className="w-full mt-4" >
           <Text>Login</Text>
         </Button>
         <Link href="/register" className="inline-block w-full text-center text-sm underline" prefetch={false}>
