@@ -12,6 +12,7 @@ interface FavoritesContextData {
     favorites: Recipe[];
     addFavorite: (recipe: Recipe) => Promise<void>;
     removeFavorite: (id: number) => Promise<void>;
+    clearFavorites: () => Promise<void>;
 }
 
 interface FavoritesProviderProps {
@@ -22,6 +23,7 @@ export const FavoritesContext = createContext<FavoritesContextData>({
     favorites: [],
     addFavorite: async () => { },
     removeFavorite: async () => { },
+    clearFavorites: async () => { },
 });
 
 export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }) => {
@@ -46,8 +48,13 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
         await saveItem('favoriteRecipes', JSON.stringify(updated));
     };
 
+    const clearFavorites = async () => {
+        setFavorites([]);
+        await saveItem('favoriteRecipes', JSON.stringify([]));
+    };
+
     return (
-        <FavoritesContext.Provider value={{ favorites, addFavorite, removeFavorite }}>
+        <FavoritesContext.Provider value={{ favorites, addFavorite, removeFavorite, clearFavorites }}>
             {children}
         </FavoritesContext.Provider>
     );

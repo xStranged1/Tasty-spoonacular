@@ -14,6 +14,7 @@ export default function SearchRecipes() {
     const [searchType, setSearchType] = useState<'name' | 'ingredient'>('name');
     const [loading, setLoading] = useState(false);
 
+
     const handleGetRecipes = async () => {
         if (!value) return;
         setLoading(true);
