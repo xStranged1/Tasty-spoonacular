@@ -10,7 +10,8 @@ export interface Recipe {
 
 interface FavoritesContextData {
     favorites: Recipe[];
-    addFavorite: (recipe: Recipe) => Promise<void>;
+    addFavorite: (recipe: Recipe) => Promise<void | true>;
+    toggleFavorite: (recipe: Recipe) => Promise<void | true>;
     removeFavorite: (id: number) => Promise<void>;
     clearFavorites: () => Promise<void>;
 }
@@ -22,6 +23,7 @@ interface FavoritesProviderProps {
 export const FavoritesContext = createContext<FavoritesContextData>({
     favorites: [],
     addFavorite: async () => { },
+    toggleFavorite: async () => { },
     removeFavorite: async () => { },
     clearFavorites: async () => { },
 });
@@ -37,10 +39,24 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
     }, []);
 
     const addFavorite = async (recipe: Recipe) => {
+        if (favorites.some(r => r.id === recipe.id)) {
+            return;
+        }
         const updated = [...favorites, recipe];
         setFavorites(updated);
         await saveItem('favoriteRecipes', JSON.stringify(updated));
+        return true
     };
+
+    const toggleFavorite = async (recipe: Recipe) => {
+        if (favorites.some(r => r.id === recipe.id)) {
+            await removeFavorite(recipe.id);
+            return
+        } else {
+            await addFavorite(recipe);
+            return true
+        }
+    }
 
     const removeFavorite = async (id: number) => {
         const updated = favorites.filter(r => r.id !== id);
@@ -54,7 +70,7 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
     };
 
     return (
-        <FavoritesContext.Provider value={{ favorites, addFavorite, removeFavorite, clearFavorites }}>
+        <FavoritesContext.Provider value={{ favorites, addFavorite, toggleFavorite, removeFavorite, clearFavorites }}>
             {children}
         </FavoritesContext.Provider>
     );
