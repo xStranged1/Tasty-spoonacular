@@ -5,6 +5,7 @@ import { FavoritesContext } from '../context/FavoritesContext';
 import { getRecipeDetail } from '~/services/recipe';
 import type { Recipe } from '~/constants/types';
 import { Button } from '~/components/ui/button';
+import { Link } from 'expo-router';
 
 export default function Favorites() {
     const { favorites } = useContext(FavoritesContext);
@@ -59,25 +60,30 @@ export default function Favorites() {
             </View>
             <ScrollView className="p-4 bg-white dark:bg-black">
                 {recipes.map((recipe) => (
-                    <TouchableOpacity
+                    <Link
                         key={recipe.id}
-                        onPress={() =>
-                            navigation.navigate('RecipeDetail', { id: recipe.id, title: recipe.title })
-                        }
-                        className="mb-6 h-48 rounded-2xl overflow-hidden"
+                        href={{
+                            pathname: `/recipe/${recipe.id}`,
+                            params: {
+                                name: recipe.title,
+                            },
+                        }}
+                        asChild
                     >
-                        <ImageBackground
-                            source={{ uri: recipe.image }}
-                            className="w-full h-full"
-                            resizeMode="cover"
-                        >
-                            <View className="absolute bottom-0 w-full bg-black bg-opacity-50 py-2 px-4">
-                                <Text className="text-white text-lg font-semibold">
-                                    {recipe.title}
-                                </Text>
-                            </View>
-                        </ImageBackground>
-                    </TouchableOpacity>
+                        <TouchableOpacity className="mb-6 h-48 rounded-2xl overflow-hidden">
+                            <ImageBackground
+                                source={{ uri: recipe.image }}
+                                className="w-full h-full"
+                                resizeMode="cover"
+                            >
+                                <View className="absolute bottom-0 w-full bg-black bg-opacity-50 dark:bg-white py-2 px-4">
+                                    <Text className="text-white dark:text-black text-lg font-semibold">
+                                        {recipe.title}
+                                    </Text>
+                                </View>
+                            </ImageBackground>
+                        </TouchableOpacity>
+                    </Link>
                 ))}
 
                 {!recipes.length && !loading && (
