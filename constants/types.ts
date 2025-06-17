@@ -79,3 +79,14 @@ export interface AutocompleteSearchRecipe {
     id: number,
     title: string,
 }
+export type Step = {
+  number: number;
+  step: string;
+  ingredients?: Array<{ id: number; name: string }>;
+  equipment?: Array<{ id: number; name: string }>;
+};
+
+export type RecipeInstructions = {
+  name: string;
+  steps: Step[];
+}[];

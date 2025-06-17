@@ -58,3 +58,14 @@ export async function searchRecipeByIngredients(ingredients: string, number: num
         return false;
     }
 }
+export async function getRecipeInstructions(id: string): Promise<any> {
+  try {
+    const response = await axios.get(
+      `https://api.spoonacular.com/recipes/${id}/analyzedInstructions?apiKey=${API_KEY}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching instructions:", error);
+    return false;
+  }
+}
