@@ -23,7 +23,7 @@ export default function LoginScreen() {
       const user = userCredential.user;
       const token = await user.getIdToken()
       signIn(token)
-      router.push('/home');
+      router.push('/(tabs)');
     } catch (error: any) {
       const errorMessage = error.message;
       if (errorMessage.includes("auth/invalid-credential")) {
@@ -41,7 +41,7 @@ export default function LoginScreen() {
     console.log(token);
 
     if (token) {
-      router.replace('/home');
+      router.push('/(tabs)');
     }
   }, [])
 

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ScrollView, TouchableOpacity, View, ImageBackground, Text, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { FavoritesContext } from '../context/FavoritesContext';
+import { FavoritesContext } from '../../context/FavoritesContext';
 import { getRecipeDetail } from '~/services/recipe';
 import type { Recipe } from '~/constants/types';
 import { Button } from '~/components/ui/button';
