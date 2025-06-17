@@ -17,7 +17,7 @@ export default function RecipeDetailScreen() {
     const [recipe, setRecipe] = useState<RecipeDetail>(dummyReceipe);
     const [loading, setLoading] = useState(true);
     const { addFavorite } = useContext(FavoritesContext)
-    console.log("RecipeDetail", id, name, recipe);
+    console.log("RecipeDetail:", name + ", id:", id);
 
     const navigation = useNavigation();
     useEffect(() => { // Pone titulo en la screen
@@ -27,8 +27,6 @@ export default function RecipeDetailScreen() {
     useEffect(() => {
         const getRecipe = async () => {
             const recipeDetail = await getRecipeDetail(id as string);
-            console.log("recipeDetail");
-            console.log(recipeDetail);
             if (recipeDetail) {
                 setRecipe(recipeDetail as RecipeDetail);
             }

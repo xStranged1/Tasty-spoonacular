@@ -112,6 +112,13 @@ export default function RootLayout() {
                   headerRight: () => <ThemeToggle />,
                 }}
               />
+              <Stack.Screen
+                name='favorites'
+                options={{
+                  title: 'Favoritos',
+                  headerRight: () => <ThemeToggle />,
+                }}
+              />
 
               <Stack.Screen
                 name='recipe/[id]'
