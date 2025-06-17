@@ -52,13 +52,8 @@ export default function Favorites() {
     }
 
     return (
-        <View>
-            <View>
-                <Button onPress={clearFavorites} className="bg-red-600">
-                    <Text className="text-white">Borrar todos los favoritos</Text>
-                </Button>
-            </View>
-            <ScrollView className="p-4 bg-white dark:bg-black">
+        <View className='flex-1'>
+            <ScrollView contentContainerStyle={{ padding: 24 }} className="bg-background">
                 {recipes.map((recipe) => (
                     <Link
                         key={recipe.id}
@@ -66,6 +61,7 @@ export default function Favorites() {
                             pathname: `/recipe/${recipe.id}`,
                             params: {
                                 name: recipe.title,
+                                isFavorite: 'true'
                             },
                         }}
                         asChild
@@ -87,13 +83,20 @@ export default function Favorites() {
                 ))}
 
                 {!recipes.length && !loading && (
-                    <View className="flex-1 items-center justify-center mt-20">
+                    <View className="items-center justify-center mt-20">
                         <Text className="text-gray-500 dark:text-gray-400">
                             No tienes recetas favoritas aún.
                         </Text>
                     </View>
                 )}
             </ScrollView>
+
+            <View className="absolute bottom-8 left-6 right-6">
+                <Button onPress={clearFavorites} className="bg-red-600">
+                    <Text className="text-white">Borrar todos los favoritos</Text>
+                </Button>
+            </View>
         </View>
+
     );
 };

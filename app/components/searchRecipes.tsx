@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, ScrollView } from "react-native";
+import { View, ScrollView, ActivityIndicator } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -7,13 +7,15 @@ import { AutocompleteSearchRecipe } from "~/constants/types";
 import { autocompleteSearchRecipe, searchRecipeByIngredients } from "~/services/recipe";
 import { Text } from "~/components/ui/text";
 import { Link } from "expo-router";
+import { Search } from '~/lib/icons/Search'
+
+import DropdownFilter from "./DropdownFilter";
 
 export default function SearchRecipes() {
     const [value, setValue] = useState("");
     const [recipes, setRecipes] = useState<AutocompleteSearchRecipe[]>([]);
     const [searchType, setSearchType] = useState<'name' | 'ingredient'>('name');
     const [loading, setLoading] = useState(false);
-
 
     const handleGetRecipes = async () => {
         if (!value) return;
@@ -39,20 +41,9 @@ export default function SearchRecipes() {
                     aria-labelledby="inputLabel"
                     aria-errormessage="inputError"
                 />
-                <View style={{ minWidth: 110, marginLeft: 8, backgroundColor: 'transparent', borderRadius: 6, overflow: 'hidden' }}>
-                    <Picker
-                        selectedValue={searchType}
-                        onValueChange={(itemValue) => setSearchType(itemValue)}
-                        mode="dropdown"
-                        dropdownIconColor="#888"
-                        style={{ height: 36, color: '#222', fontSize: 12 }}
-                    >
-                        <Picker.Item label="Nombre" value="name" />
-                        <Picker.Item label="Ingrediente" value="ingredient" />
-                    </Picker>
-                </View>
+                <DropdownFilter onSelect={(value: any) => setSearchType(value)} />
                 <Button variant="outline" onPress={handleGetRecipes} disabled={loading}>
-                    <Text>{loading ? "Buscando..." : "Buscar"}</Text>
+                    {loading ? <ActivityIndicator size="large" className="flex-1 justify-center" /> : <Search size={24} className="text-foreground" />}
                 </Button>
             </View>
 

@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useContext, useEffect, useState } from "react";
-import { View, Image, ScrollView } from "react-native";
+import { View, Image, ScrollView, Linking } from "react-native";
 import { Text } from '~/components/ui/text';
 import { RecipeDetail } from "~/constants/types";
 import { getRecipeDetail, getRecipeInstructions } from "~/services/recipe";
@@ -9,14 +9,23 @@ import LoadingScreen from "./components/LoadingScreen";
 import { Card, CardContent, CardDescription, CardFooter } from "~/components/ui/card";
 import { dummyReceipe } from "~/constants/const";
 import { FavoritesContext } from "~/context/FavoritesContext";
+import { Heart } from '~/lib/icons/Heart'
+import { HeartOff } from '~/lib/icons/HeartOff'
+import { showSuccessToast } from "~/hooks/toast";
 import { Button } from "~/components/ui/button";
 
 export default function RecipeDetailScreen() {
-    const { id, name } = useLocalSearchParams();
+    const { id, name, isFavorite } = useLocalSearchParams();
     const [recipe, setRecipe] = useState<RecipeDetail>(dummyReceipe);
     const [steps, setSteps] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const { addFavorite } = useContext(FavoritesContext);
+    const { favorites, toggleFavorite } = useContext(FavoritesContext);
+    console.log("isFavorite");
+    console.log(isFavorite);
+
+    const [isInFavorites, setIsInfavorites] = useState(isFavorite ? true : false);
+    console.log("isInFavorites");
+    console.log(isInFavorites);
 
     const navigation = useNavigation();
     useEffect(() => {
@@ -30,9 +39,16 @@ export default function RecipeDetailScreen() {
                     getRecipeDetail(id as string),
                     getRecipeInstructions(id as string)
                 ]);
-                
+
                 if (recipeDetail) {
                     setRecipe(recipeDetail as RecipeDetail);
+                    const isFavorite = favorites.some(fav => fav.id == (id || 0))
+                    console.log("setea isFavorite");
+                    console.log(isFavorite);
+                    console.log("favorites");
+                    console.log(favorites);
+
+                    setIsInfavorites(isFavorite)
                 }
                 if (instructions && instructions.length > 0) {
                     setSteps(instructions[0].steps);
@@ -47,6 +63,30 @@ export default function RecipeDetailScreen() {
         getRecipe();
     }, [id]);
 
+
+    const openExternalLink = (url: string) => {
+        Linking.openURL(url);
+    };
+
+    const handleAddFavorite = async () => {
+        const favoriteRecipe = {
+            id: recipe?.id || 0,
+            title: recipe?.title || "",
+            image: recipe?.image || "",
+        };
+        if (isInFavorites) {
+            setIsInfavorites(false);
+        } else {
+            setIsInfavorites(true);
+        }
+        const res = await toggleFavorite(favoriteRecipe);
+        if (res) {
+            showSuccessToast('Receta agregada a favoritos', '');
+            return
+        }
+        showSuccessToast('Se eliminó esta receta de favoritos', '');
+    }
+
     if (loading) {
         return <LoadingScreen />;
     }
@@ -59,18 +99,11 @@ export default function RecipeDetailScreen() {
                     source={{ uri: recipe?.image }}
                     className="w-full h-64 object-cover"
                 />
-                <Button 
+                <Button
                     className="absolute top-2 right-2 bg-background/90 rounded-full p-2"
-                    onPress={() => {
-                        const favoriteRecipe = {
-                            id: recipe?.id || 0,
-                            title: recipe?.title || "",
-                            image: recipe?.image || "",
-                        };
-                        addFavorite(favoriteRecipe);
-                    }}
+                    onPress={handleAddFavorite}
                 >
-                    <Text className="text-primary">❤️</Text>
+                    {!isInFavorites ? (<Heart size={24} color='#e81224' />) : (<HeartOff size={24} color='#e81224' />)}
                 </Button>
             </View>
 
@@ -83,8 +116,8 @@ export default function RecipeDetailScreen() {
                             ⏱️ {recipe?.readyInMinutes} minutos • 🍽️ {recipe?.servings} porciones
                         </Text>
                     </View>
-                </CardDescription>
 
+                </CardDescription>
                 {/* Ingredientes */}
                 <CardContent className="px-4 pb-4">
                     <Text className="text-lg font-bold mb-2 text-foreground">Ingredientes:</Text>
@@ -120,9 +153,14 @@ export default function RecipeDetailScreen() {
             {recipe?.sourceUrl && (
                 <Card className="m-4">
                     <CardFooter className="p-4">
-                        <Text className="text-sm text-muted-foreground">
-                            Fuente: <Text className="text-blue-500 underline">{recipe.sourceName}</Text>
-                        </Text>
+                        <Button variant='ghost' onPress={() => {
+                            openExternalLink(recipe.sourceUrl);
+                        }}>
+                            <Text className="text-sm text-muted-foreground">
+                                Fuente: <Text className="text-blue-500 underline">{recipe.sourceName}</Text>
+                            </Text>
+                        </Button>
+
                     </CardFooter>
                 </Card>
             )}

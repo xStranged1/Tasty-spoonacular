@@ -13,7 +13,7 @@ export default function TabLayout() {
     }, [navigation]);
 
     return (
-        <Tabs screenOptions={{ tabBarActiveTintColor: 'blue' }}>
+        <Tabs screenOptions={{ tabBarActiveTintColor: '#2068ff' }}>
             <Tabs.Screen
                 name="ingredients"
                 options={{

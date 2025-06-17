@@ -1,6 +1,6 @@
 import { RecipeDetail } from "./types";
 
-const EXPO_PUBLIC_API_KEY= '351fe4dc8c0344d0b3b6074246d3756b';
+const EXPO_PUBLIC_API_KEY = 'ca095ad5603f40ef9babf2c8c41119cc';
 
 export { EXPO_PUBLIC_API_KEY }
 

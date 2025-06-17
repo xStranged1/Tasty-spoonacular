@@ -99,24 +99,11 @@ export default function RootLayout() {
                   title: 'Login',
                 }}
               />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen
                 name='register'
                 options={{
                   title: 'Registro',
-                }}
-              />
-              <Stack.Screen
-                name='home'
-                options={{
-                  title: 'Starter Base',
-                  headerRight: () => <ThemeToggle />,
-                }}
-              />
-              <Stack.Screen
-                name='favorites'
-                options={{
-                  title: 'Favoritos',
-                  headerRight: () => <ThemeToggle />,
                 }}
               />
 
