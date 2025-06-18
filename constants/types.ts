@@ -1,3 +1,11 @@
+export interface IngredientSearchResponse {
+    id: number;
+    name: string;
+    image: string;
+    aisle: string; // titulo
+    possibleUnits: string[];
+}
+
 export interface Ingredient {
     aisle: string;
     amount: number;
@@ -80,13 +88,13 @@ export interface AutocompleteSearchRecipe {
     title: string,
 }
 export type Step = {
-  number: number;
-  step: string;
-  ingredients?: Array<{ id: number; name: string }>;
-  equipment?: Array<{ id: number; name: string }>;
+    number: number;
+    step: string;
+    ingredients?: Array<{ id: number; name: string }>;
+    equipment?: Array<{ id: number; name: string }>;
 };
 
 export type RecipeInstructions = {
-  name: string;
-  steps: Step[];
+    name: string;
+    steps: Step[];
 }[];
