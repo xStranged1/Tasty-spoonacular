@@ -63,7 +63,7 @@ export default function LoginScreen() {
         <Button className="w-full mt-4" onPress={handleLogin}>
           <Text>Login</Text>
         </Button>
-        <Link href="/(tabs)" className="inline-block w-full text-center text-sm underline" prefetch={false}>
+        <Link href="/register" className="inline-block w-full text-center text-sm underline" prefetch={false}>
           <Text>No tenes una cuenta? Registrate</Text>
         </Link>
       </View>

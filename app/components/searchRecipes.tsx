@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { View, ScrollView, ActivityIndicator } from "react-native";
-import { Picker } from '@react-native-picker/picker';
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { AutocompleteSearchRecipe } from "~/constants/types";

@@ -1,89 +1,61 @@
-import { useState } from "react";
-import { View, FlatList, TextInput, Modal, TouchableOpacity } from "react-native";
+import { useState, useRef, useMemo } from "react";
+import { View, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { Text } from "~/components/ui/text";
 import { Button } from "~/components/ui/button";
-import { searchIngredients } from "~/services/ingredients";
 import { useIngredientsStore } from "~/context/IngredientesStore";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import AddIngredient from "../components/AddIngredient";
+import { showSuccessToast } from "~/hooks/toast";
 
 export default function IngredientsScreen() {
-    const { ingredients, addIngredient, removeIngredient } = useIngredientsStore();
-    const [searchModalVisible, setSearchModalVisible] = useState(false);
-    const [searchResults, setSearchResults] = useState([]);
-    const [query, setQuery] = useState("");
-    const [selectedAmount, setSelectedAmount] = useState("");
+    const { clearIngredients } = useIngredientsStore();
+    const ingredients = useIngredientsStore.getState().ingredients
+    const bottomSheetRef = useRef<BottomSheet>(null);
 
-    const handleSearch = async () => {
-        const results = await searchIngredients(query);
-        console.log("results");
-        console.log(results);
-
-        setSearchResults(results);
-    };
-
-    const handleSelect = (item) => {
-        if (!selectedAmount) return;
-        addIngredient({ ...item, amount: parseFloat(selectedAmount) });
-        setSearchModalVisible(false);
-        setQuery("");
-        setSelectedAmount("");
-    };
+    const openBottomSheet = () => bottomSheetRef.current?.expand();
+    const handleClearIngredients = () => {
+        clearIngredients();
+        showSuccessToast("Todos los ingredientes han sido borrados", "");
+    }
 
     return (
-        <View className="flex-1 p-4">
-            <Text className="text-xl font-bold mb-4">Ingredientes</Text>
-
-            <FlatList
-                data={ingredients}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <View className="p-2 border-b border-gray-300">
-                        <Text>{item.name} - {item.amount}</Text>
-                    </View>
-                )}
-            />
-
-            <Button className="mt-4 bg-blue-600" onPress={() => setSearchModalVisible(true)}>
-                <Text className="text-white">Agregar Ingrediente</Text>
-            </Button>
-
-            <Modal visible={searchModalVisible} animationType="slide">
-                <View className="flex-1 p-4">
-                    <TextInput
-                        placeholder="Buscar ingrediente..."
-                        value={query}
-                        onChangeText={setQuery}
-                        className="border p-2 rounded mb-2"
-                    />
-                    <Button onPress={handleSearch} className="bg-green-600 mb-2">
-                        <Text className="text-white">Buscar</Text>
-                    </Button>
-
-                    <TextInput
-                        placeholder="Cantidad"
-                        value={selectedAmount}
-                        onChangeText={setSelectedAmount}
-                        keyboardType="numeric"
-                        className="border p-2 rounded mb-4"
-                    />
-
+        <GestureHandlerRootView className="flex-1">
+            <View className="flex-1 items-center gap-5 p-6 dark:bg-[#000]">
+                {ingredients.length === 0 && <Text className="text-xl font-bold mb-4">No tienes ingredientes agregados</Text>}
+                {ingredients.length > 0 && (
                     <FlatList
-                        data={searchResults}
+                        className="w-full"
+                        data={ingredients}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
-                            <TouchableOpacity
-                                className="p-2 border-b border-gray-200"
-                                onPress={() => handleSelect(item)}
-                            >
-                                <Text>{item.name}</Text>
-                            </TouchableOpacity>
+                            <View className="mb-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                                <Text className="text-lg font-bold text-gray-800 dark:text-white">{item.name}</Text>
+                                <View className="flex-row justify-between mt-2">
+                                    <View className="flex-row items-center">
+                                        <Text className="text-gray-600 dark:text-gray-300">Unidad: </Text>
+                                        <Text className="font-medium text-gray-800 dark:text-white">{item.unit}</Text>
+                                    </View>
+                                    <View className="flex-row items-center">
+                                        <Text className="text-gray-600 dark:text-gray-300">Cantidad: </Text>
+                                        <Text className="font-medium text-gray-800 dark:text-white">{item.amount}</Text>
+                                    </View>
+                                </View>
+                            </View>
                         )}
                     />
+                )}
 
-                    <Button onPress={() => setSearchModalVisible(false)} className="mt-4 bg-red-500">
-                        <Text className="text-white">Cerrar</Text>
-                    </Button>
-                </View>
-            </Modal>
-        </View>
+                <Button className="bg-green-600" onPress={openBottomSheet}>
+                    <Text className="text-white">Agregar Ingrediente</Text>
+                </Button>
+                <Button onPress={handleClearIngredients} className="bg-red-600">
+                    <Text className="text-white">Borrar todos los ingredientes</Text>
+                </Button>
+            </View>
+
+            <AddIngredient bottomSheetRef={bottomSheetRef} />
+
+        </GestureHandlerRootView>
     );
 }
